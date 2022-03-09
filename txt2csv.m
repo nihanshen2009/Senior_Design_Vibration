@@ -1,4 +1,4 @@
-raw_time_file_name = "datalog.txt";
+raw_time_file_name = "Data/datalog.txt";
 
 fileID = fopen(raw_time_file_name, 'r')
 
