@@ -8,7 +8,7 @@ IntervalTimer myTimer;
 
 QwiicKX134 kxAccel;
 outputData myData;
-
+rawOutputData rawData;
 
 volatile unsigned int buff_1[512];
 volatile unsigned int ind = 0;
@@ -20,6 +20,8 @@ const int fileNum;
 
 void setup()
 {
+  delay(500);
+  pinMode(17, OUTPUT);
   Serial.begin(9600);
   if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
@@ -30,6 +32,7 @@ void setup()
   else
     Serial.println("card initialized.");
   Wire.begin();
+  Wire.setClock(1000000);
   if( !kxAccel.begin() ){
     Serial.println("Could not communicate with the the KX13X. Freezing.");
     while(1);
@@ -40,9 +43,13 @@ void setup()
     Serial.println("Could not initialize the KX13X chip.");
     while(1);
   }
-  else
+  else {
     Serial.println("All systems initialized...");
+    Serial.println("Convertion factor: ");
+    Serial.print(.0002441407513657033);
+  }
   Serial.println(kxAccel.setOutputDataRate(0b1011));
+  
   myTimer.begin(measure_time, 625);
 }
 
@@ -68,17 +75,27 @@ void loop()
 }
  
 void measure_time () {
-  rawOutputData rawData;
-  kxAccel.getRawAccelData(&rawData);
+  digitalWrite(17, 1);
+  
   if(activeBuff == 0) {
-    buff_1[ind] = rawData.xData;
+    buff_1[ind] = micros();
+    buff_1[ind+1] = rawData.xData;
+    buff_1[ind+2] = rawData.yData;
+    buff_1[ind+3] = rawData.zData;
   } else {
-    buff_2[ind] = rawData.xData;
+    buff_2[ind] = micros();
+    buff_2[ind+1] = rawData.xData;
+    buff_2[ind+2] = rawData.yData;
+    buff_2[ind+3] = rawData.zData;
   }
-  ind += 1;
+  ind += 4;
   if (ind >= 512) {
     ind = 0;
     full = 1;
     activeBuff = !activeBuff;
+    
   }
+  
+  kxAccel.getRawAccelData(&rawData);
+  digitalWrite(17, 0);
 }
