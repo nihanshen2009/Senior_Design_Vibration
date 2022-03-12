@@ -1,6 +1,6 @@
 %% load digital audio signal
 %sampled data (signal) and sample rate (Fs)
-filename = 'PinkPanther30.wav';
+filename = 'Data/PinkPanther30.wav';
 [signal,Fs]=audioread(filename);  
 
 %% FFT parameters

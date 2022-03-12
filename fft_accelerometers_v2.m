@@ -1,6 +1,8 @@
+clc
+clear
 %% load digital acceleration signal
 %sampled data [r x 4] 
-filename = 'handheld.csv';
+filename = 'Data/handheld.csv';
 signal =readtable(filename);  
 
 %% Create new time array
