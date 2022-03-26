@@ -4,11 +4,14 @@
 #include <SPI.h>
 
 const int chipSelect = BUILTIN_SDCARD;
+const int ledPin = 13;
 IntervalTimer myTimer;
 
 QwiicKX134 kxAccel;
 outputData myData;
 rawOutputData rawData;
+
+bool ledStat = 0;
 
 volatile unsigned int buff_1[512];
 volatile unsigned int ind = 0;
@@ -22,6 +25,7 @@ void setup()
 {
   delay(500);
   pinMode(17, OUTPUT);
+  pinMode(ledPin, OUTPUT);
   Serial.begin(9600);
   if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
@@ -67,6 +71,9 @@ void loop()
       dataFile.close();
       full = 0;
       Serial.println("written");
+      //debug led that will blink to show activity
+      ledStat = !ledStat;
+      digitalWrite(ledPin, ledStat);
     } else {
       Serial.println("file error");
     }
