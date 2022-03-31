@@ -12,10 +12,10 @@ outputData myData;
 rawOutputData rawData;
 
 bool ledStat = 0;
-
-volatile unsigned int buff_1[512];
+const int buffSize = 128;
+volatile unsigned int buff_1[buffSize];
 volatile unsigned int ind = 0;
-volatile unsigned int buff_2[512];
+volatile unsigned int buff_2[buffSize];
 volatile bool activeBuff = 0;
 volatile bool full = 0;
 const int fileNum;
@@ -57,10 +57,10 @@ void setup()
     Serial.print(.0002441407513657033); //Convertion multiplier for raw data (in g)
   }
   //Accel output data rate
-  Serial.println(kxAccel.setOutputDataRate(0b1011)); //test the change to 0b1100
+  kxAccel.setOutputDataRate(0b1011); //test the change to 0b1100
 
   //Timer interrupt initilization
-  myTimer.begin(measure_time, 625);
+  myTimer.begin(measure_time, 2000);
 }
 
 void loop()
@@ -76,7 +76,7 @@ void loop()
       }
       dataFile.close();
       full = 0;
-      Serial.println("written");
+      //Serial.println("written");
       //debug led that will blink to show activity
       ledStat = !ledStat;
       digitalWrite(ledPin, ledStat);
@@ -88,8 +88,8 @@ void loop()
 }
  
 void measure_time () {
-  digitalWrite(17, 1); //set the debugging pin high
-  
+  //digitalWrite(17, 1); //set the debugging pin high
+  kxAccel.getRawAccelData(&rawData);
   if(activeBuff == 0) { //write the data to appropriate buffer
     buff_1[ind] = micros(); //time
     buff_1[ind+1] = rawData.xData; //x accel
@@ -102,12 +102,12 @@ void measure_time () {
     buff_2[ind+3] = rawData.zData; //z accel
   }
   ind += 4; //increment the index
-  if (ind >= 512) { //if index excedes the buffer size
+  if (ind >= buffSize) { //if index excedes the buffer size
     ind = 0; //reset index
     full = 1; //set the full flag high
     activeBuff = !activeBuff; //switch the active buffer
   }
   
-  kxAccel.getRawAccelData(&rawData); //pole the sensor
-  digitalWrite(17, 0); //set the debugging pin low
+   //pole the sensor
+  //digitalWrite(17, 0); //set the debugging pin low
 }
